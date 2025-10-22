@@ -1,6 +1,6 @@
 const CLOSE_API_BASE = import.meta.env.DEV 
   ? '/api/close' 
-  : 'https://api.close.com/api/v1';
+  : '/api/close-proxy';
 const CLOSE_API_KEY = import.meta.env.VITE_CLOSE_API_KEY;
 
 export class CloseApiService {
@@ -20,7 +20,7 @@ export class CloseApiService {
     };
 
     const queryParams = new URLSearchParams({ ...defaultParams, ...params });
-    const CLOSE_API_BASE = import.meta.env.DEV ? '/api/close' : 'https://api.close.com/api/v1';
+    const CLOSE_API_BASE = import.meta.env.DEV ? '/api/close' : '/api/close-proxy';
     
     const response = await fetch(`${CLOSE_API_BASE}/lead/?${queryParams}`, {
       method: 'GET',

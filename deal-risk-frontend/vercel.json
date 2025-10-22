@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/close-proxy/:path*",
+      "destination": "/api/close-proxy"
+    }
+  ]
+}
