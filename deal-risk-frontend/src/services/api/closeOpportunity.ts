@@ -1,8 +1,3 @@
-const CLOSE_API_BASE = import.meta.env.DEV 
-  ? '/api/close' 
-  : '/api/close-proxy';
-const CLOSE_API_KEY = import.meta.env.VITE_CLOSE_API_KEY;
-
 export class CloseApiService {
   private static getHeaders() {
     const API_KEY = import.meta.env.VITE_CLOSE_API_KEY;
@@ -20,9 +15,11 @@ export class CloseApiService {
     };
 
     const queryParams = new URLSearchParams({ ...defaultParams, ...params });
-    const CLOSE_API_BASE = import.meta.env.DEV ? '/api/close' : '/api/close-proxy';
     
-    const response = await fetch(`${CLOSE_API_BASE}/lead/?${queryParams}`, {
+    // Always use the serverless function (works for both localhost and production)
+    const url = `/api/close-proxy/lead?${queryParams}`;
+    
+    const response = await fetch(url, {
       method: 'GET',
       headers: this.getHeaders(),
     });

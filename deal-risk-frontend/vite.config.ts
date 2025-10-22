@@ -6,26 +6,5 @@ export default defineConfig({
   plugins: [
     tailwindcss(),
     react(),
-  ],
-  server: {
-    cors:{
-      origin: 'https://deal-risk-analyst.vercel.app',
-      credentials: true
-    },
-    proxy: {
-      '/api/close': {
-        target: 'https://api.close.com/api/v1',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api\/close/, ''),
-        configure: (proxy, options) => {
-          proxy.on('proxyReq', (proxyReq, req, res) => {
-            // Forward the Authorization header
-            if (req.headers.authorization) {
-              proxyReq.setHeader('Authorization', req.headers.authorization);
-            }
-          });
-        }
-      }
-    }
-  }
+  ]
 })
