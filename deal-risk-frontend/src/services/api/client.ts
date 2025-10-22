@@ -1,5 +1,5 @@
 export const API_CLIENTS = {
-  internal: "http://localhost:8000/api",
+  internal: "https://deal-risk-analyst.vercel.app/api",
   close: import.meta.env.VITE_CLOSE_API_BASE_URL,
 };
 

@@ -8,6 +8,10 @@ export default defineConfig({
     react(),
   ],
   server: {
+    cors:{
+      origin: 'https://deal-risk-analyst.vercel.app',
+      credentials: true
+    },
     proxy: {
       '/api/close': {
         target: 'https://api.close.com/api/v1',
