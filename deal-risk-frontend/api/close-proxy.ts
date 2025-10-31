@@ -17,7 +17,7 @@ export default async function handler(
   }
   
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-close-api-key');
   res.setHeader('Access-Control-Allow-Credentials', 'true');
 
   // Handle preflight
@@ -35,10 +35,19 @@ export default async function handler(
     
     console.log('Proxying request to:', url);
 
+    const customApiKey = req.headers['x-close-api-key'] as string;
+    const apiKey = customApiKey || process.env.VITE_CLOSE_API_KEY;
+    
+    if (!apiKey) {
+      return res.status(500).json({ error: 'API key not configured' });
+    }
+    
+    const auth = Buffer.from(apiKey + ':').toString('base64');
+
     const response = await fetch(url, {
       method: req.method,
       headers: {
-        'Authorization': req.headers.authorization || '',
+        'Authorization': `Basic ${auth}`,
         'Content-Type': 'application/json',
       },
       body: req.method !== 'GET' && req.body ? JSON.stringify(req.body) : undefined,

@@ -1,10 +1,10 @@
-import { useMemo, useEffect, useState } from 'react';
+import { useMemo } from 'react';
 import { useOpportunities } from '../Opportunities/useOpportunities';
 import { useAIRisk } from '../../contexts/aiRisk/AIRiskContext';
 import { EnhancedDeal } from '../../types';
 
 export const useEnhancedDeals = () => {
-  const { opportunities, loading: opportunitiesLoading, error, refetch } = useOpportunities();
+  const { opportunities, loading: opportunitiesLoading, error, requiresApiKey, refetch } = useOpportunities();
   const { analyzeOpportunity, getAnalysis, isAnalyzing, getError } = useAIRisk();
 
 
@@ -14,13 +14,13 @@ export const useEnhancedDeals = () => {
       const analyzing = isAnalyzing(opp.id);
       const aiError = getError(opp.id);
 
-      const dealName = `${opp.contact_name || 'Contact'} - ${opp.status_label || 'Opportunity'}`;
+      const dealName = opp.lead_name || 'Unknown Company';
 
       return {
         id: opp.id,
         closeOpportunityId: opp.id,
         name: dealName,
-        company: opp.lead_name || 'Unknown Company',
+        company: opp.lead_email || 'No email available',
         owner: opp.user_name || 'Unknown Owner',
         lastContact: opp.date_updated,
         engagementScore: opp.confidence || 50,
@@ -48,7 +48,11 @@ export const useEnhancedDeals = () => {
     deals: enhancedDeals,
     loading: opportunitiesLoading,
     error,
+    requiresApiKey,
     refetch,
+    getOpportunityById: (opportunityId: string) => {
+      return opportunities.find(opp => opp.id === opportunityId);
+    },
     retryAnalysis: (opportunityId: string) => {
       const opportunity = opportunities.find(opp => opp.id === opportunityId);
       if (opportunity) {

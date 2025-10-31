@@ -37,6 +37,12 @@ export interface CloseOpportunity{
   note: string;
   confidence: number;
   custom_fields?: Record<string, any>;
+  lead_email?: string | null;
+  lead_phone?: string | null;
+  lead_description?: string | null;
+  lead_url?: string | null;
+  lead_custom_fields?: Record<string, any> | null;
+  full_lead_data?: any;
 }
 
 export interface OpportunitiesResponse {
@@ -68,4 +74,37 @@ export interface AIAnalysisState{
   analyses: Record<string, AIRiskAnalysis>;
   loading: Record<string, boolean>;
   errors: Record<string, string | undefined>;
+}
+
+export interface EmailActivity {
+  id: string;
+  _type: string;
+  organization_id: string;
+  lead_id: string;
+  contact_id: string;
+  date_created: string;
+  date_updated: string;
+  direction: 'incoming' | 'outgoing';
+  user_id: string;
+  user_name: string;
+  sender: string;
+  to: string[];
+  cc: string[];
+  bcc: string[];
+  subject: string;
+  body_text: string;
+  body_html?: string;
+  status: string;
+  opens: any[];
+  attachments: Array<{
+    url: string;
+    filename: string;
+    size: number;
+    content_type: string;
+  }>;
+}
+
+export interface EmailActivityResponse {
+  has_more: boolean;
+  data: EmailActivity[];
 }

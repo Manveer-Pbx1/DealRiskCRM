@@ -27,8 +27,7 @@ export const DealCard: React.FC<DealCardProps> = ({ deal, onRetryAnalysis }) => 
           </span>
         )}
       </div>
-      <p className="text-sm text-[rgb(var(--text))] mb-1">Owner: {deal.owner}</p>
-      <p className="text-sm text-[rgb(var(--text))] mb-1">Contact: {deal.contactName}</p>
+      <p className="text-sm text-[rgb(var(--text))] mb-2 opacity-70">{deal.company}</p>
       <p className="text-sm text-[rgb(var(--text))] mb-1">Pipeline: {deal.pipelineName}</p>
       <p className="text-sm text-[rgb(var(--text))] mb-1">Status: {deal.statusLabel}</p>
       <p className="text-sm text-[rgb(var(--text))] mb-1">
@@ -48,9 +47,9 @@ export const DealCard: React.FC<DealCardProps> = ({ deal, onRetryAnalysis }) => 
             e.stopPropagation();
             onRetryAnalysis();
           }}
-          className="mt-3 w-full py-2 px-3 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition-colors"
+          className="mt-3 w-full py-2 px-3 bg-yellow-300 text-black text-sm font-extrabold rounded hover:bg-yellow-700 transition-colors cursor-pointer inline-flex items-center justify-center"
         >
-          Analyze with AI
+          Analyze <Emoji unified="1f4a1" size={16} emojiStyle={EmojiStyle.APPLE} />
         </button>
       )}
     </div>

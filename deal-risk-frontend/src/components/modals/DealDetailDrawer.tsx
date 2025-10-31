@@ -1,20 +1,32 @@
-import React from "react";
-import { EnhancedDeal } from "../../types";
+import React, { useState } from "react";
+import { EnhancedDeal, CloseOpportunity } from "../../types";
+import { EmailDraftModal } from "./EmailDraftModal";
+import { useEmailActivity } from "../../hooks/useEmailActivity/useEmailActivity";
 
 interface DealDetailsDrawerProps {
   deal: EnhancedDeal | null;
   onClose: () => void;
   onRetryAnalysis?: () => void;
   isAnalyzing?: boolean;
+  opportunityData?: CloseOpportunity;
 }
+
 
 export const DealDetailsDrawer: React.FC<DealDetailsDrawerProps> = ({
   deal,
   onClose,
   onRetryAnalysis,
   isAnalyzing = false,
+  opportunityData,
 }) => {
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const { lastEmail, loading: emailLoading } = useEmailActivity(opportunityData?.lead_id);
+
   if (!deal) return null;
+
+  const handleDraftEmail = () => {
+    setShowEmailModal(true);
+  };
 
   return (
     <div className="fixed inset-0 flex justify-end z-40">
@@ -173,7 +185,64 @@ export const DealDetailsDrawer: React.FC<DealDetailsDrawerProps> = ({
             ))}
           </ol>
         </div>
+
+        {/* Last Email Sent Section */}
+        <div className="mb-6 mt-6">
+          <h3 className="text-sm font-semibold text-[rgb(var(--text))] mb-2">
+            Last Email Sent
+          </h3>
+          {emailLoading ? (
+            <div className="bg-[rgb(var(--bgCards))] p-3 rounded-lg border border-[rgb(var(--text))] border-opacity-20">
+              <div className="flex items-center">
+                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600 mr-2"></div>
+                <span className="text-[rgb(var(--textCards))] text-sm">Loading email history...</span>
+              </div>
+            </div>
+          ) : lastEmail ? (
+            <div className="bg-[rgb(var(--bgCards))] p-3 rounded-lg border border-[rgb(var(--text))] border-opacity-20">
+              <div className="mb-2">
+                <p className="text-sm font-semibold text-[rgb(var(--text))]">{lastEmail.subject}</p>
+                <p className="text-xs text-gray-500">
+                  {new Date(lastEmail.date_created).toLocaleDateString()} at{" "}
+                  {new Date(lastEmail.date_created).toLocaleTimeString()}
+                </p>
+              </div>
+              <p className="text-xs text-[rgb(var(--textCards))]">
+                {lastEmail.body_text?.substring(0, 200)}{lastEmail.body_text && lastEmail.body_text.length > 200 ? "..." : ""}
+              </p>
+              {lastEmail.attachments && lastEmail.attachments.length > 0 && (
+                <p className="text-xs text-blue-600 mt-2">
+                  📎 {lastEmail.attachments.length} attachment{lastEmail.attachments.length > 1 ? "s" : ""}
+                </p>
+              )}
+            </div>
+          ) : (
+            <div className="bg-[rgb(var(--bgCards))] p-3 rounded-lg border border-[rgb(var(--text))] border-opacity-20 text-center">
+              <p className="text-sm text-gray-500">No emails sent to this lead yet</p>
+            </div>
+          )}
+        </div>
+
+        <button 
+          onClick={handleDraftEmail} 
+          disabled={!opportunityData}
+          className={`mt-4 w-full px-4 py-2 text-sm font-bold rounded transition-colors ${
+            opportunityData 
+              ? 'bg-yellow-300 text-black hover:bg-yellow-400' 
+              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+          }`}
+        >
+          Draft Email
+        </button>
       </div>
+
+      {showEmailModal && opportunityData && (
+        <EmailDraftModal
+          deal={deal}
+          onClose={() => setShowEmailModal(false)}
+          opportunityData={opportunityData}
+        />
+      )}
     </div>
   );
 };
