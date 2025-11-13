@@ -43,7 +43,8 @@ export const DealDetailsDrawer: React.FC<DealDetailsDrawerProps> = ({
         <p className="text-gray-500 mb-4">{deal.company}</p>
 
         <div className="mb-4">
-          <p className="text-sm text-[rgb(var(--text))]">Owner: {deal.owner}</p>
+          <p className="text-sm text-[rgb(var(--text))]">Lead Owner: {deal.owner}</p>
+          <p className="text-sm text-[rgb(var(--text))]">Contact: {deal.contactName}</p>
           <p className="text-sm text-[rgb(var(--text))]">
             Last Contact: {new Date(deal.lastContact).toLocaleDateString()}
           </p>
@@ -61,6 +62,8 @@ export const DealDetailsDrawer: React.FC<DealDetailsDrawerProps> = ({
               {deal.riskLevel}
             </span>
           </p>
+          <p className="text-sm text-[rgb(var(--text))]">Pipeline: {deal.pipelineName}</p>
+          <p className="text-sm text-[rgb(var(--text))]">Status: {deal.statusLabel}</p>
         </div>
 
         {deal.aiAnalysis && (
@@ -115,22 +118,6 @@ export const DealDetailsDrawer: React.FC<DealDetailsDrawerProps> = ({
                   AI Score: {deal.aiAnalysis.riskScore}
                 </span>
               </div>
-              
-              <div className="mb-4">
-                <h5 className="text-sm font-semibold text-[rgb(var(--text))] mb-2">AI Assessment:</h5>
-                <p className="text-sm text-[rgb(var(--textCards))]">{deal.aiAnalysis.reason}</p>
-              </div>
-
-              {deal.aiAnalysis.recommendations.length > 0 && (
-                <div>
-                  <h5 className="text-sm font-semibold text-[rgb(var(--text))] mb-2">AI Recommendations:</h5>
-                  <ul className="list-disc list-inside text-sm text-[rgb(var(--textCards))] space-y-1">
-                    {deal.aiAnalysis.recommendations.map((rec, index) => (
-                      <li key={index}>{rec}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
 
               {onRetryAnalysis && (
                 <button

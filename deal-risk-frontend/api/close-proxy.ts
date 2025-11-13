@@ -26,14 +26,10 @@ export default async function handler(
   }
 
   try {
-    // Parse the query string from the request
     const queryString = req.url?.split('?')[1] || '';
     const path = req.query.path || 'lead';
     
-    // Build the Close.io API URL
     const url = `https://api.close.com/api/v1/${path}${queryString ? `?${queryString}` : ''}`;
-    
-    console.log('Proxying request to:', url);
 
     const customApiKey = req.headers['x-close-api-key'] as string;
     const apiKey = customApiKey || process.env.VITE_CLOSE_API_KEY;
@@ -55,7 +51,6 @@ export default async function handler(
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Close API error:', response.status, errorText);
       return res.status(response.status).json({ 
         error: `Close API Error: ${response.status}`,
         details: errorText 
@@ -63,6 +58,7 @@ export default async function handler(
     }
 
     const data = await response.json();
+    
     return res.status(200).json(data);
   } catch (error: any) {
     console.error('Proxy error:', error);

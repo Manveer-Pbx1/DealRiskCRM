@@ -36,7 +36,7 @@ export const useEmail = () => {
     try {
       const apiUrl = import.meta.env.DEV 
         ? 'http://localhost:3001/api/send-email'
-        : '/api/send-email';
+        : 'https://deal-risk-backend.onrender.com/api/send-email';
 
       const response = await fetch(apiUrl, {
         method: 'POST',

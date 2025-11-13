@@ -1,19 +1,22 @@
 import { DealCard } from "../../components/common/DealCard";
 import { Emoji, EmojiStyle } from "emoji-picker-react";
 import { DealDetailsDrawer } from "../../components/modals/DealDetailDrawer";
+import { AuthorizedUsersDisplay } from "../../components/common/AuthorizedUsersDisplay";
+import { FilterAnalytics } from "../../components/common/FilterAnalytics";
 import { useState, useMemo } from "react";
 import { useEnhancedDeals } from "../../hooks/useAI/useAI";
 import { EnhancedDeal } from "../../types";
 import { useAIRisk } from "../../contexts/aiRisk/AIRiskContext";
+import { ALLOWED_USERS } from "../../constants/allowedUsers";
 
 type SortOption = 'newest' | 'oldest' | 'risk-high' | 'risk-low';
 
 export default function Dashboard() {
   const [selectedDealId, setSelectedDealId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<SortOption>('newest');
-  const [customApiKey, setCustomApiKey] = useState<string>('');
-  const [showApiInput, setShowApiInput] = useState<boolean>(false);
-  const { deals, loading, error, requiresApiKey, retryAnalysis, analyzeDeal, getOpportunityById } = useEnhancedDeals();
+  const [selectedUserId, setSelectedUserId] = useState<string>('');
+  const [showAuthorizedUsers, setShowAuthorizedUsers] = useState<boolean>(false);
+  const { deals, loading, error, requiresApiKey, retryAnalysis, analyzeDeal, getOpportunityById } = useEnhancedDeals(selectedUserId || undefined);
   
   const { isAnalyzing } = useAIRisk();
 
@@ -32,13 +35,6 @@ export default function Dashboard() {
         return dealsCopy;
     }
   }, [deals, sortBy]);
-
-  const handleApiKeySubmit = () => {
-    if (customApiKey.trim()) {
-      localStorage.setItem('CUSTOM_CLOSE_API_KEY', customApiKey);
-      window.location.reload();
-    }
-  };
 
   const selectedDeal = selectedDealId ? sortedDeals.find(d => d.id === selectedDealId) || null : null;
 
@@ -60,7 +56,7 @@ export default function Dashboard() {
       <div className="min-h-screen bg-[rgb(var(--bg))] dashboard-root p-6 flex items-center justify-center">
         <div className="max-w-md w-full">
           <div className="text-red-600 text-lg mb-4 text-center">{error}</div>
-          {requiresApiKey && (
+      {requiresApiKey && (
             <div className="bg-[rgb(var(--bgCards))] p-6 rounded-lg border border-gray-300">
               <h3 className="text-[rgb(var(--text))] font-semibold mb-3">Configure API Key</h3>
               <p className="text-sm text-[rgb(var(--text))] mb-4 opacity-70">
@@ -69,13 +65,10 @@ export default function Dashboard() {
               <div className="flex flex-col gap-3">
                 <input
                   type="text"
-                  value={customApiKey}
-                  onChange={(e) => setCustomApiKey(e.target.value)}
                   placeholder="Enter Close API Key"
                   className="px-3 py-2 text-sm bg-white text-gray-800 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <button
-                  onClick={handleApiKeySubmit}
                   className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                 >
                   Connect
@@ -99,16 +92,22 @@ export default function Dashboard() {
 
       <section>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-family text-[rgb(var(--textActive))] font-bold">
-            Active Deals ({sortedDeals.length})
-          </h2>
+          <div>
+            <h2 className="text-lg font-family text-[rgb(var(--textActive))] font-bold">
+              User Leads ({sortedDeals.length})
+            </h2>
+          </div>
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => setShowApiInput(!showApiInput)}
-              className="px-3 py-1.5 text-sm bg-yellow-300 text-black font-extrabold rounded-md hover:bg-yellow-700 transition-colors"
+            <select
+              value={selectedUserId}
+              onChange={(e) => setSelectedUserId(e.target.value)}
+              className="px-3 py-1.5 text-sm bg-[rgb(var(--bgCards))] text-[rgb(var(--text))] border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              {showApiInput ? 'Hide' : 'Add Account'}
-            </button>
+              <option value="">All Users</option>
+              {ALLOWED_USERS.map(user => (
+                <option key={user.id} value={user.id}>{user.name}</option>
+              ))}
+            </select>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as SortOption)}
@@ -119,31 +118,11 @@ export default function Dashboard() {
               <option value="risk-high">Highest Risk</option>
               <option value="risk-low">Lowest Risk</option>
             </select>
-            <div className="text-sm text-[rgb(var(--text))]">
-              AI-Enhanced Risk Analysis
-            </div>
+            <FilterAnalytics totalLeads={sortedDeals.length} />
           </div>
         </div>
 
-        {showApiInput && (
-          <div className="mb-6 p-4 bg-[rgb(var(--bgCards))] rounded-lg border border-gray-300">
-            <div className="flex items-center gap-3">
-              <input
-                type="text"
-                value={customApiKey}
-                onChange={(e) => setCustomApiKey(e.target.value)}
-                placeholder="Enter Close API Key"
-                className="flex-1 px-3 py-2 text-sm bg-white text-gray-800 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <button
-                onClick={handleApiKeySubmit}
-                className="px-4 py-2 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
-              >
-                Connect
-              </button>
-            </div>
-          </div>
-        )}
+
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {sortedDeals.map((deal) => (

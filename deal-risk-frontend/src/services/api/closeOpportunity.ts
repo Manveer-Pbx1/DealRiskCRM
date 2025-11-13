@@ -1,9 +1,9 @@
+import { ALLOWED_USERS } from '../../constants/allowedUsers';
+
 export class CloseApiService {
   private static getApiUrl() {
-    // In production (Vercel), use the serverless function
-    // In local dev, use the local dev server
     const isDev = import.meta.env.DEV;
-    return isDev ? 'http://localhost:3001' : '';
+    return isDev ? 'http://localhost:3001' : 'https://deal-risk-backend.onrender.com';
   }
 
   static async getOpportunities(params?: Record<string, string>) {
@@ -15,8 +15,6 @@ export class CloseApiService {
     const queryParams = new URLSearchParams({ ...defaultParams, ...params });
     const baseUrl = this.getApiUrl();
     const url = `${baseUrl}/api/close-proxy/lead?${queryParams}`;
-    
-    console.log('Fetching opportunities from:', url);
     
     const customApiKey = localStorage.getItem('CUSTOM_CLOSE_API_KEY');
     const headers: HeadersInit = {
@@ -37,7 +35,6 @@ export class CloseApiService {
     }
 
     const data = await response.json();
-    console.log('Close API Response:', data);
     
     const flattenedOpportunities = data.data.flatMap((lead: any) => 
       (lead.opportunities || []).map((opp: any) => ({
@@ -56,7 +53,7 @@ export class CloseApiService {
     return {
       data: flattenedOpportunities,
       has_more: data.has_more,
-      total_results: data.total_results
+      total_results: flattenedOpportunities.length
     };
   }
 

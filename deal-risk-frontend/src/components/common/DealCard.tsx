@@ -28,6 +28,7 @@ export const DealCard: React.FC<DealCardProps> = ({ deal, onRetryAnalysis }) => 
         )}
       </div>
       <p className="text-sm text-[rgb(var(--text))] mb-2 opacity-70">{deal.company}</p>
+      <p className="text-sm text-[rgb(var(--text))] mb-1">Owner: {deal.owner}</p>
       <p className="text-sm text-[rgb(var(--text))] mb-1">Pipeline: {deal.pipelineName}</p>
       <p className="text-sm text-[rgb(var(--text))] mb-1">Status: {deal.statusLabel}</p>
       <p className="text-sm text-[rgb(var(--text))] mb-1">

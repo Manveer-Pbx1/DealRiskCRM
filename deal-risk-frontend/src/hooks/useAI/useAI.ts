@@ -2,14 +2,21 @@ import { useMemo } from 'react';
 import { useOpportunities } from '../Opportunities/useOpportunities';
 import { useAIRisk } from '../../contexts/aiRisk/AIRiskContext';
 import { EnhancedDeal } from '../../types';
+import { ALLOWED_USERS } from '../../constants/allowedUsers';
 
-export const useEnhancedDeals = () => {
+export const useEnhancedDeals = (selectedUserId?: string) => {
   const { opportunities, loading: opportunitiesLoading, error, requiresApiKey, refetch } = useOpportunities();
   const { analyzeOpportunity, getAnalysis, isAnalyzing, getError } = useAIRisk();
 
+  const filteredOpportunities = useMemo(() => {
+    if (!selectedUserId) return opportunities;
+    return opportunities.filter(opp => 
+      opp.user_id === selectedUserId || opp.user_name === selectedUserId
+    );
+  }, [opportunities, selectedUserId]);
 
   const enhancedDeals: EnhancedDeal[] = useMemo(() => {
-    return opportunities.map(opp => {
+    return filteredOpportunities.map(opp => {
       const analysis = getAnalysis(opp.id);
       const analyzing = isAnalyzing(opp.id);
       const aiError = getError(opp.id);
@@ -42,7 +49,7 @@ export const useEnhancedDeals = () => {
         isAnalyzed: !!analysis,
       };
     });
-  }, [opportunities, getAnalysis, isAnalyzing, getError]);
+  }, [filteredOpportunities, getAnalysis, isAnalyzing, getError]);
 
   return {
     deals: enhancedDeals,
@@ -51,16 +58,16 @@ export const useEnhancedDeals = () => {
     requiresApiKey,
     refetch,
     getOpportunityById: (opportunityId: string) => {
-      return opportunities.find(opp => opp.id === opportunityId);
+      return filteredOpportunities.find(opp => opp.id === opportunityId);
     },
     retryAnalysis: (opportunityId: string) => {
-      const opportunity = opportunities.find(opp => opp.id === opportunityId);
+      const opportunity = filteredOpportunities.find(opp => opp.id === opportunityId);
       if (opportunity) {
         analyzeOpportunity(opportunity);
       }
     },
     analyzeDeal: (opportunityId: string) => {
-      const opportunity = opportunities.find(opp => opp.id === opportunityId);
+      const opportunity = filteredOpportunities.find(opp => opp.id === opportunityId);
       if (opportunity) {
         analyzeOpportunity(opportunity);
       }
