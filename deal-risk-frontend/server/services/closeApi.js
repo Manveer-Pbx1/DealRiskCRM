@@ -39,8 +39,6 @@ export const fetchEmailActivity = async (queryParams, apiKey) => {
   const queryString = new URLSearchParams(queryParams).toString();
   const url = `${config.CLOSE_API_BASE_URL}/activity/email?${queryString}`;
   
-  logger.info('Fetching email activity from Close API:', url);
-  
   if (!apiKey) {
     const error = new Error('API key required');
     error.status = 401;
@@ -60,7 +58,6 @@ export const fetchEmailActivity = async (queryParams, apiKey) => {
   
   if (!response.ok) {
     const errorText = await response.text();
-    logger.error('Close API error:', response.status, errorText);
     
     const error = new Error(`Close API Error: ${response.status}`);
     error.status = response.status;
@@ -69,7 +66,6 @@ export const fetchEmailActivity = async (queryParams, apiKey) => {
   }
   
   const data = await response.json();
-  logger.info(`Fetched ${data.data?.length || 0} email activities from Close API`);
   
   return data;
 };
