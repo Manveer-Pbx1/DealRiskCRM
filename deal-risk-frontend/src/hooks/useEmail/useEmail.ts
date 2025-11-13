@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { GeminiRiskAnalyzerService } from '../../services/ai/gemini';
+import { OpenAIRiskAnalyzerService } from '../../services/ai/openai';
 import { CloseOpportunity } from '../../types';
 
 interface EmailData {
@@ -18,7 +18,7 @@ export const useEmail = () => {
     setError(null);
     
     try {
-      const emailBody = await GeminiRiskAnalyzerService.generateEmailContent(deal);
+      const emailBody = await OpenAIRiskAnalyzerService.generateEmailContent(deal);
       return emailBody;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to generate email';

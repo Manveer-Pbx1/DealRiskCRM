@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
 import { AIAnalysisState, AIRiskAnalysis, CloseOpportunity } from '../../types';
-import { GeminiRiskAnalyzerService } from '../../services/ai/gemini';
+import { OpenAIRiskAnalyzerService } from '../../services/ai/openai';
 
 interface AIRiskContextType {
   state: AIAnalysisState;
@@ -71,7 +71,7 @@ export function AIRiskProvider({ children }: { children: ReactNode }) {
 
     try {
       console.log('Starting analysis for:', opportunity.id);
-      const analysis = await GeminiRiskAnalyzerService.analyzeRisk(opportunity);
+      const analysis = await OpenAIRiskAnalyzerService.analyzeRisk(opportunity);
       console.log('Analysis result:', analysis);
       dispatch({ 
         type: 'ANALYSIS_SUCCESS', 

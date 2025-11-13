@@ -1,18 +1,13 @@
 import { CloseOpportunity } from "../../types";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import OpenAI from "openai";
 
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ 
-    model: "gemini-2.5-flash",
-    generationConfig: {
-        temperature: 0.4,
-        topP: 0.95,
-        topK: 40,
-    }
+const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
+const openai = new OpenAI({
+    apiKey: OPENAI_API_KEY,
+    dangerouslyAllowBrowser: true
 });
 
-export class GeminiRiskAnalyzerService {
+export class OpenAIRiskAnalyzerService {
     static generatePrompt(deal: CloseOpportunity): string {
         const currentDate = new Date().toISOString();
         const statusLabel = deal.status_label || 'Unknown';
@@ -50,25 +45,30 @@ Return only this JSON:
         const prompt = this.generatePrompt(deal);
 
         try {
-            const result = await model.generateContent({
-                contents: [{ role: "user", parts: [{ text: prompt }] }],
+            const completion = await openai.chat.completions.create({
+                model: "gpt-4o",
+                messages: [
+                    {
+                        role: "system",
+                        content: "You are a sales risk analysis expert. Always respond with valid JSON only."
+                    },
+                    {
+                        role: "user",
+                        content: prompt
+                    }
+                ],
+                temperature: 0.4,
+                max_tokens: 500,
+                response_format: { type: "json_object" }
             });
-            const response = result.response;
-            const content = response.text();
+
+            const content = completion.choices[0]?.message?.content;
 
             if (!content) {
                 throw new Error('No response from AI');
             }
 
-            const cleanContent = content
-                .replace(/```json\n?/gi, '')
-                .replace(/```\n?/gi, '')
-                .trim();
-            
-            const jsonMatch = cleanContent.match(/\{[\s\S]*\}/);
-            const jsonStr = jsonMatch ? jsonMatch[0] : cleanContent;
-            
-            const parsed = JSON.parse(jsonStr);
+            const parsed = JSON.parse(content);
             
             return {
                 riskScore: parsed.riskScore || 50,
@@ -76,11 +76,11 @@ Return only this JSON:
                 recommendations: parsed.recommendations || []
             };
         } catch (err: any) {
-            console.error('Gemini API Error:', err);
-            const isOverloaded = err.message?.includes('overloaded') || err.message?.includes('429') || err.message?.includes('503');
+            console.error('OpenAI API Error:', err);
+            const isRateLimited = err.message?.includes('429') || err.message?.includes('rate limit');
             return {
                 riskScore: 50,
-                reason: isOverloaded ? "AI service temporarily unavailable. Try again in a moment." : "AI analysis failed. Please try again.",
+                reason: isRateLimited ? "AI service rate limit reached. Try again in a moment." : "AI analysis failed. Please try again.",
                 recommendations: [
                     "Review deal manually",
                     "Contact the lead directly",
@@ -99,9 +99,23 @@ Return only this JSON:
     `;
 
         try {   
-            const result = await model.generateContent(prompt);
-            const response = await result.response;
-            const content = response.text();
+            const completion = await openai.chat.completions.create({
+                model: "gpt-4o",
+                messages: [
+                    {
+                        role: "system",
+                        content: "You are a professional email writer for sales teams."
+                    },
+                    {
+                        role: "user",
+                        content: prompt
+                    }
+                ],
+                temperature: 0.7,
+                max_tokens: 400
+            });
+            
+            const content = completion.choices[0]?.message?.content;
             
             if (!content) {
                 throw new Error('No response from AI');
@@ -109,9 +123,11 @@ Return only this JSON:
             
             return content.trim();
         } catch (err) {
+            console.error('OpenAI Email Generation Error:', err);
             return `Dear ${deal.lead_name || 'Valued Customer'},
 
 I hope this message finds you well. I wanted to touch base regarding your current deal status with us. Please feel free to reach out if you have any questions or need further assistance.
+
 Best regards,
 [Your Name]`;
         }
