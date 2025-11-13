@@ -1,10 +1,9 @@
 import express from "express";
-import { sendSuccess } from "../utils/responseHelper";
 
 const router = express.Router();
 
 router.get("/health", (req, res) => {
-  sendSuccess(res, { status: "ok", timestamp: new Date().toISOString() });
+    res.status(200).json({ status: "OK", message: "Service is healthy" });
 });
 
 export default router;  
